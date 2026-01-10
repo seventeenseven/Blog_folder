@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+    {% block title %}
+    <title>Détail article</title>
+    {% endblock %}
+    {% block subheading %}
+        <span class="subheading">POST DETAIL</span>
+    {% endblock %}
+    {% block content %}
+        <h1>Titre : {{ article.titre }}</h1>
+        <p>
+            Categorie de l'article : <u> {{ article.categorie.nom|lower }}</u><br>
+            Date de publication <em>{{ article.date_publication|date:'F j, Y' }} </em>
+        </p>
+        <h3>Auteur :  {{ article.auteur.username }} {{ article.auteur.first_name }} {{ article.auteur.last_name }}</h3>
+        <a href="{% url 'supprimer_article' article_title=article.titre %}"><button class="btn btn-danger flex float-right">Delete article</button></a> 
+        <p>Contenu : <br/><br/>{{ article.contenu|urlize|linebreaks }}</p>
+
+        <!-- Galerie de photos de l'article -->
+        <h3>Galerie de photos</h3>
+        <div style="display: flex; gap:12px; flex-wrap: wrap;">
+        {% for photo in article.photos.all %}
+            <figure style="max-width: 240px;">
+                <img src="{{ photo.image.url }}" alt="{{photo.legende}}" 
+                        style="width: 100%; height: auto; border-radius: 5px;">
+                {% if photo.legende %}
+                <figcaption>{{ photo.legende}}</figcaption>
+                {% endif %}
+            </figure>
+        {% endfor %}
+        </div>
+        
+
+        <h3>Commentaires</h3>
+        {% if article.commentaire_set.all %}
+        <ul>
+            {% for comment in article.commentaire_set.all %}
+                <li>{{comment.name}} <i>{{comment.date_publication}}</i> : </br>
+                    {{comment.contenu}}</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+            <p>Aucun commentaire pour l'instant.</p>
+        {% endif %}
+
+
+        <h1>Ajoutez un commentaire ici</h1>
+        <form method="POST" action="{% url 'comment-create' pk=article.id %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Envoyer">
+        </form>
+    </div>
+    {% endblock %}
