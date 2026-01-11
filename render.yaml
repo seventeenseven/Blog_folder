@@ -9,17 +9,8 @@ services:
     name: blog
     plan: free
     runtime: python
-
-    buildCommand: |
-      pip install -r requirements.txt
-      python manage.py collectstatic --noinput
-
-    startCommand: gunicorn blog.asgi:application -k uvicorn.workers.UvicornWorker --preload
-
-    postDeployCommand: |
-      python manage.py migrate --noinput
-      python manage.py createsuperuser --noinput || true  
-
+    buildCommand: './build.sh'
+    startCommand: 'gunicorn blog/blog.asgi:application -k uvicorn.workers.UvicornWorker'
     envVars:
       - key: DATABASE_URL
         fromDatabase:
