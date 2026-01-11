@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Créer un article</title>
+  <style>
+    :root{ --bg:#0b0c0e; --card:#111318; --txt:#e8e8ea; --muted:#a1a1aa; --primary:#4f46e5; --ring:#6366f1; --border:#23242a; --error:#ef4444; }
+    @media (prefers-color-scheme: light){
+      :root{ --bg:#f6f7fb; --card:#fff; --txt:#0f172a; --muted:#5b6472; --border:#e5e7eb; --primary:#4338ca; --ring:#4f46e5; --error:#dc2626; }
+    }
+    *{box-sizing:border-box}
+    body{ margin:0; background:var(--bg); color:var(--txt); min-height:100dvh; display:grid; place-items:center; font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    .card{ width:100%; max-width:720px; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; box-shadow:0 10px 30px rgba(0,0,0,.25); }
+    h1{ margin:0 0 18px; font-size:1.5rem; }
+    .muted{ color:var(--muted); font-size:.9rem; margin-bottom:14px }
+    form{ display:grid; gap:16px; margin-top:10px }
+    .field{ display:grid; gap:6px }
+    label{ font-weight:600; font-size:.95rem }
+    input[type="text"], select, textarea, input[type="file"]{
+      width:100%; padding:10px 12px; border:1px solid var(--border);
+      background:transparent; color:var(--txt); border-radius:10px; outline:none;
+    }
+    textarea{ resize:vertical; min-height:180px }
+    input:focus, select:focus, textarea:focus{
+      border-color:var(--ring);
+      box-shadow:0 0 0 4px color-mix(in srgb, var(--ring) 20%, transparent);
+    }
+    .errorlist{ margin:0; padding:10px 12px; list-style:none; color:var(--error);
+      background:color-mix(in srgb, var(--error) 12%, transparent);
+      border:1px solid color-mix(in srgb, var(--error) 50%, transparent);
+      border-radius:10px; font-size:.9rem }
+    .actions{ display:flex; gap:10px; justify-content:flex-end; }
+    button{
+      appearance:none; border:1px solid transparent; cursor:pointer;
+      background:var(--primary); color:#fff; padding:10px 14px; border-radius:10px; font-weight:600;
+    }
+    a.btn{ border:1px solid var(--border); padding:10px 14px; border-radius:10px; color:var(--txt); text-decoration:none }
+    a.btn:hover{ background:color-mix(in srgb, var(--txt) 8%, transparent) }
+    .photo-block{ padding:12px; border:1px dashed var(--border); border-radius:12px }
+  </style>
+</head>
+<body>
+  {% include "navbar.html" %}
+
+  <main class="card" role="main" aria-labelledby="create-title">
+    <h1 id="create-title">Créer un article</h1>
+    <p class="muted">Titre, contenu, catégorie, tags — et ajoutez des photos si besoin.</p>
+
+    {% if form.non_field_errors %}
+      <ul class="errorlist">{{ form.non_field_errors }}</ul>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      <div class="field">
+        <label for="{{ form.titre.id_for_label }}">Titre</label>
+        {{ form.titre }}
+        {% if form.titre.errors %}<ul class="errorlist">{% for e in form.titre.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+
+      <div class="field">
+        <label for="{{ form.contenu.id_for_label }}">Contenu</label>
+        {{ form.contenu }}
+        {% if form.contenu.errors %}<ul class="errorlist">{% for e in form.contenu.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+
+      <div class="field">
+        <label for="{{ form.categorie.id_for_label }}">Catégorie</label>
+        {{ form.categorie }}
+        {% if form.categorie.errors %}<ul class="errorlist">{% for e in form.categorie.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+
+      <div class="field">
+        <label for="{{ form.tags.id_for_label }}">Tags</label>
+        {{ form.tags }}
+        {% if form.tags.errors %}<ul class="errorlist">{% for e in form.tags.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+
+      <div>
+        <h3>Photos</h3>
+        {{ photos_formset.management_form }}
+        {% for f in photos_formset %}
+          <div class="photo-block">
+            <div class="field">
+              <label>Image</label>
+              {{ f.image }}
+            </div>
+            <div class="field">
+              <label>Légende (optionnel)</label>
+              {{ f.legende }}
+            </div>
+            {% if f.instance.pk %}
+              <div class="field">
+                <label>Supprimer</label> {{ f.DELETE }}
+              </div>
+            {% endif %}
+            {% if f.errors %}
+              <ul class="errorlist">
+                {% for err in f.errors.values %}
+                  <li>{{ err }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="actions">
+        <a href="{% url 'articles-list' %}" class="btn">Annuler</a>
+        <button type="submit">Publier</button>
+      </div>
+    </form>
+  </main>
+</body>
+</html>

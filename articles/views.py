@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404,redirect
 from django.urls import reverse
 from django.views.generic import TemplateView, ListView, DetailView, CreateView
 
-from .forms import CommentCreateForm
+from .forms import CommentCreateForm, ArticleCreateForm, PhotoFormSet
 from .models import Article, Commentaire, Categorie
 import datetime
 from django.db.models import Q, Count
@@ -10,7 +10,46 @@ from django.contrib.auth.models import User
 
 from rest_framework import viewsets
 from .serializers import ArticleSerializer
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import permission_required, login_required
+from django.contrib import messages
+
+@login_required
+def create_article(request):
+    if request.method == "POST":
+        #In http  method post
+        #Traitement du formulaire
+        form = ArticleCreateForm(request.POST)
+        if form.is_valid():
+            #Save form
+            new_article = form.save(commit=False)
+            new_article.auteur = request.user    # On relie l'article àn l'utilisateur actuellement connecté
+            new_article.save()
+            form.save_m2m()         #Save tags 
+
+            #Traitement des photos de l'article
+            photos_formset = PhotoFormSet(request.POST, request.FILES, instance=new_article)
+
+            if photos_formset.is_valid():
+                photos_formset.save()
+                messages.success(request, "Article et photos ajoutés avec succès.")
+                return redirect("post-detail", pk=new_article.pk)
+            else :
+                return render(
+                    request, "article_form.html", {"form":form, "photos_formset":photos_formset}
+                )
+        else :
+            photos_formset = PhotoFormSet()
+            return render(
+                    request, "article_form.html", {"form":form, "photos_formset":photos_formset}
+                )
+    #In method GET
+    form = ArticleCreateForm()
+    photos_formset = PhotoFormSet()
+    return render(
+                    request, "article_form.html", {"form":form, "photos_formset":photos_formset}
+                )
+
+
 
 # Create your views here.
 class HomeView(TemplateView):

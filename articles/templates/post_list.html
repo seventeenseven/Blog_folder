@@ -4,6 +4,9 @@
 {% endblock %}
 {% block content %}
     <h1>Liste des Articles</h1>
+    <br>
+    <a href="{% url 'article-create' %}"><button class="btn btn-warning">Créer un article</button></a>
+    <br><br>
     <ul>
     {% for post in articles %}
         <li><a href="{% url 'post-detail' pk=post.id %}"> {{ post.titre }} </a> - {{ post.date_publication }} </li>

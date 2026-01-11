@@ -1,5 +1,25 @@
 from django import forms
-from .models import Commentaire
+from .models import Commentaire, Article, Photo
+from django.forms import inlineformset_factory
+
+class ArticleCreateForm(forms.ModelForm):
+    class Meta :
+        model = Article
+        fields = ["titre", "contenu", "categorie", "tags"]
+        widgets = {
+            "contenu": forms.Textarea(attrs={
+                "rows":10, "placeholder":"Rédigez votre article ici..."
+                })
+        }
+
+PhotoFormSet = inlineformset_factory(
+    parent_model=Article,
+    model=Photo,
+    fields=["image", "legende"],
+    extra=3, 
+    max_num=5,
+    can_delete=True
+)
 
 class CommentCreateForm(forms.ModelForm):
     # username = forms.CharField(max_length=50, 

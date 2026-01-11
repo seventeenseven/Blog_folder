@@ -14,6 +14,14 @@
             <li class="nav-list-item">
                 <a href="{% url 'articles-list' %}" class="nav-link">Posts</a>
             </li>
+            {% if user.is_superuser %}
+            <li class="nav-list-item">
+                <a href="{% url 'admin:index' %}" class="nav-link">Admin page</a>
+            </li>
+            {% endif %}
+            <li class="nav-list-item">
+                <a href="{% url 'users:profile' %}" class="nav-link">Profile</a>
+            </li>
             <li class="nav-list-item">
                 <form method="post" action="{% url 'users:logout' %}">
                     {% csrf_token %}

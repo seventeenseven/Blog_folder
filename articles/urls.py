@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import HomeView, PostListView, AboutView, \
             PostDetailView, CommentCreateView, show_categories, \
-            ArticleViewSet, supprimer_article
+            ArticleViewSet, supprimer_article, create_article
 
 router = DefaultRouter()
 router.register(r'articles', ArticleViewSet)
@@ -19,5 +19,6 @@ urlpatterns = [
     #article/2/details
     path("article/<int:pk>/comment", CommentCreateView.as_view(), name="comment-create"),
     path("all_categories/", show_categories, name="all_categories"),
-    path('article/<str:article_title>/delete', supprimer_article, name="supprimer_article")
+    path('article/<str:article_title>/delete', supprimer_article, name="supprimer_article"),
+    path('article/create', create_article, name="article-create"),
 ]
