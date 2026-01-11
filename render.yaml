@@ -9,8 +9,8 @@ services:
     plan: free
     name: blog
     runtime: python
-    buildCommand: './blog/build.sh'
-    startCommand: 'python -m gunicorn blog/blog.asgi:application -k uvicorn.workers.UvicornWorker'
+    buildCommand: './build.sh'
+    startCommand: 'python -m gunicorn blog.asgi:application -k uvicorn.workers.UvicornWorker'
     envVars:
       - key: DATABASE_URL
         fromDatabase:
