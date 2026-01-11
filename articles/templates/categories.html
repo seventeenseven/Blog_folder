@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>All categories</title>
+{% endblock %}
+
+{% block subheading %}
+        <span class="subheading">ALL CATEGORIES</span>
+{% endblock %}
+
+{% block content %}
+    <h2>All categories</h2>
+    {% for categorie in categories_list %}
+        <p>{{ categorie.nom }}</p>
+    {% endfor %}
+{% endblock %}

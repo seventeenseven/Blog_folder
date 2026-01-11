@@ -1,0 +1,7 @@
+<h2>Ajout de commentaire</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Envoyer">
+</form>

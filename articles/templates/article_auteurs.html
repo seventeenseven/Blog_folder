@@ -1,0 +1,10 @@
+<h1>Informations articles auteurs</h1>
+
+{% for info in infos %}
+    <p>Username : {{ info.auteur.username }}</p>
+    <p>Email : {{ info.auteur.email }}</p>
+    <p>Admin ? {{ info.auteur.is_superuser }}</p>
+    <p>Titre : {{info.titre}}</p>
+    <p>Date : {{info.date_publication}}</p>
+
+{% endfor %}
