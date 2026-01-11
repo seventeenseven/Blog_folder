@@ -10,7 +10,7 @@ services:
     plan: free
     runtime: python
     buildCommand: './build.sh'
-    startCommand: 'gunicorn blog/blog.asgi:application -k uvicorn.workers.UvicornWorker'
+    startCommand: 'gunicorn blog.asgi:application -k uvicorn.workers.UvicornWorker'
     envVars:
       - key: DATABASE_URL
         fromDatabase:
