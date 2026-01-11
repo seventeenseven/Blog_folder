@@ -7,6 +7,9 @@ from django.contrib.auth.models import User
 class Tags(models.Model):
     nom = models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.nom
+
 class Article(models.Model):            #Sera traduit en table de donnée
     #Définir les attributs
     #Ces attributs constitueront les colonnes de ma table Article
@@ -19,7 +22,7 @@ class Article(models.Model):            #Sera traduit en table de donnée
     #One to one
     #image_principal = models.OneToOneField("ImagePrincipale", on_delete=models.DO_NOTHING)
     #Many to Many
-    tags = models.ManyToManyField(Tags, related_name="articles")
+    tags = models.ManyToManyField(Tags, related_name="articles", blank=True)
 
     #Relation entre les articles et les utilisateurs (auteurs)
     auteur = models.ForeignKey(User, on_delete=models.DO_NOTHING)
