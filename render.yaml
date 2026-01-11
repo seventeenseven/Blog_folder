@@ -9,14 +9,17 @@ services:
     name: blog
     plan: free
     runtime: python
+
     buildCommand: |
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
+
     startCommand: gunicorn blog.asgi:application -k uvicorn.workers.UvicornWorker --preload
+
     postDeployCommand: |
-      cd blog
-      python manage.py migrate
-      python manage.py createsuperuser --noinput || true
+      python manage.py migrate --noinput
+      python manage.py createsuperuser --noinput || true  
+
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -28,9 +31,10 @@ services:
         value: "1"
       - key: DEBUG
         value: "0"
+      # requis par createsuperuser --noinput
       - key: DJANGO_SUPERUSER_USERNAME
         value: "admin"
       - key: DJANGO_SUPERUSER_EMAIL
-        value: "ajane717@gmail.com"
+        value: "admin@example.com"
       - key: DJANGO_SUPERUSER_PASSWORD
-        value: "my_super_strong_password147"
+        value: "Un_M0tDePasse_TRES_fort_!_123"
