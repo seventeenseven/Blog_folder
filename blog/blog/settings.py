@@ -12,21 +12,28 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+import environ
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env_file = BASE_DIR / ".env"
+if env_file.exists():
+    environ.Env.read_env(env_file)
+
+env = environ.Env()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = env('SECRET_KEY', default='mysecretkey')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = env('DEBUG', default=True)
 
-ALLOWED_HOSTS = ["localhost","*.herokuapp.com", ".onrender.com"]
+ALLOWED_HOSTS = ["127.0.0.1","localhost","*.herokuapp.com", ".onrender.com"]
 
 
 # Application definition
@@ -46,34 +53,21 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware'
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
 
-STORAGES = {
-    'staticfiles': {
-        "BACKEND":"whitenoise.storage.CompressedManifestStaticFilesStorage"
-    }
-}
-
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-#         'LOCATION': '127.0.0.1:11211',
-#     }
-# }
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'unique-blog-cache',
     }
 }
-
 
 ROOT_URLCONF = 'blog.urls'
 
@@ -102,36 +96,25 @@ CSRF_TRUSTED_ORIGINS = [
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 #Configs for PostgreSQL
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME' : os.getenv("DB_NAME"),
-#         'USER': os.getenv("DB_USER"),
-#         'PASSWORD' : os.getenv("DB_PASSWORD"),
-#         'HOST' : os.getenv("DB_HOST"),
-#         'PORT' : os.getenv("DB_PORT")
+#         'NAME' : env("DB_NAME"),
+#         'USER': env("DB_USER"),
+#         'PASSWORD' : env("DB_PASSWORD"),
+#         'HOST' : env("DB_HOST"),
+#         'PORT' : env("DB_PORT")
 #     }
 # }
 
-#Configs for Render 
-import dj_database_url
-
 DATABASES = {
     "default": dj_database_url.config(
-        default=os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
+        default=env("DATABASE_URL",default= f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
         conn_max_age=600,
-        ssl_require=bool(os.getenv("RENDER")),  # True en prod Render
+        # ssl_require=bool(env("RENDER" , default=False)),  # True en prod Render
     )
 }
-
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -195,7 +178,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -203,6 +186,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "users:login"
 
-#Config Https
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = not DEBUG
+# This production code might break development mode, so we check whether we're in DEBUG mode
+if not DEBUG:
+    # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+    # Enable the WhiteNoise storage backend, which compresses static files to reduce disk use
+    # and renames the files with unique names for each version to support long-term caching
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    #Config Https
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = not DEBUG
